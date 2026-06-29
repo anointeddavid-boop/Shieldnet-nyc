@@ -1,0 +1,13 @@
+# Maven build output
+app/target/
+*.jar
+*.class
+
+# Nano backup files
+*~
+
+# Environment files
+.env
+
+# OS files
+.DS_Store
