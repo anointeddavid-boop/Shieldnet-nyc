@@ -1,0 +1,8 @@
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/service/EligibilityService.java
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/ShieldNetApplication.java
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/model/Borough.java
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/dto/EligibilityResponse.java
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/model/BenefitType.java
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/model/EligibilityStatus.java
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/dto/EligibilityRequest.java
+/home/teddy/projects/shieldnet-nyc/app/src/main/java/com/shieldnet/controller/EligibilityController.java
