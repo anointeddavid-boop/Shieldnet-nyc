@@ -4,7 +4,7 @@ pipeline {
         IMAGE_NAME = 'shieldnet/benefits-api'
         IMAGE_TAG = "${BUILD_NUMBER}"
         CONTAINER_NAME = 'shieldnet-api'
-        APP_PORT = '8080'
+        APP_PORT = '9090'
     }
     stages {
         stage('Checkout') {
