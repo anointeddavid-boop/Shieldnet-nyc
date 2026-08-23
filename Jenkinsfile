@@ -27,16 +27,6 @@ pipeline {
                 }
             }
         }
-        stage('Docker Push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push shieldnet/benefits-api:latest
-                    '''
-                }
-            }
-        }
         stage('Deploy') {
             steps {
                 sh "docker stop ${CONTAINER_NAME} || true"
@@ -53,7 +43,7 @@ pipeline {
     }
     post {
         success {
-            echo 'ShieldNet NYC Pipeline Complete!'
+            echo 'ShieldNet NYC Pipeline Complete and DEPLOYED!'
         }
         failure {
             echo 'ShieldNet NYC Pipeline FAILED'
