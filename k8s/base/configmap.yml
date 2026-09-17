@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shieldnet-config
+  namespace: shieldnet
+data:
+  APP_NAME: "shieldnet-benefits-api"
+  APP_PORT: "8080"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"

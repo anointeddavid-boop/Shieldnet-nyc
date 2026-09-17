@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shieldnet-benefits-api
+  namespace: shieldnet
+  labels:
+    app: shieldnet-benefits-api
+    version: "1.0.0"
+    project: shieldnet-nyc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: shieldnet-benefits-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: shieldnet-benefits-api
+        version: "1.0.0"
+    spec:
+      containers:
+        - name: shieldnet-benefits-api
+          image: shieldnet/benefits-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+cat > service.yml << 'EOF'
+apiVersion: v1
+kind: Service
+metadata:
+  name: shieldnet-benefits-api
+  namespace: shieldnet
+  labels:
+    app: shieldnet-benefits-api
+    project: shieldnet-nyc
+spec:
+  type: LoadBalancer
+  selector:
+    app: shieldnet-benefits-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
