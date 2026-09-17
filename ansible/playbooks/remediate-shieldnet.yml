@@ -1,0 +1,49 @@
+---
+- name: ShieldNet Self-Healing Remediation Playbook
+  hosts: shieldnet_servers
+  become: yes
+  vars:
+    container_name: shieldnet-api
+    app_port: 8080
+    docker_image: shieldnet/benefits-api:latest
+
+  tasks:
+    - name: Check if container is running
+      command: docker inspect -f '{{ "{{" }}.State.Running{{ "}}" }}' {{ container_name }}
+      register: container_state
+      ignore_errors: yes
+
+    - name: Restart container if not running
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "{{ app_port }}:8080"
+      when: container_state.stdout != "true" or container_state.rc != 0
+
+    - name: Check disk space
+      command: df -h /
+      register: disk_space
+
+    - name: Alert if disk usage above 80 percent
+      debug:
+        msg: "WARNING - Disk usage critical on {{ inventory_hostname }}"
+      when: "'8[0-9]%\|9[0-9]%\|100%' in disk_space.stdout"
+
+    - name: Clean unused Docker images
+      command: docker image prune -f
+
+    - name: Verify app health after remediation
+      uri:
+        url: "http://localhost:{{ app_port }}/api/v1/health"
+        method: GET
+        status_code: 200
+      retries: 3
+      delay: 10
+      register: health_check
+
+    - name: Print remediation result
+      debug:
+        msg: "Remediation complete - ShieldNet is {{ health_check.json.status }}"

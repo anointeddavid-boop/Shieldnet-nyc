@@ -1,0 +1,72 @@
+---
+- name: Deploy ShieldNet NYC Benefits API
+  hosts: shieldnet_servers
+  become: yes
+  vars:
+    app_name: shieldnet-benefits-api
+    docker_image: shieldnet/benefits-api:latest
+    container_name: shieldnet-api
+    app_port: 8080
+
+  tasks:
+    - name: Update system packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Pull latest ShieldNet image
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+        force_source: yes
+
+    - name: Stop existing container if running
+      docker_container:
+        name: "{{ container_name }}"
+        state: absent
+      ignore_errors: yes
+
+    - name: Deploy ShieldNet container
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "{{ app_port }}:8080"
+        env:
+          HOSTNAME: "{{ inventory_hostname }}"
+
+    - name: Wait for app to start
+      wait_for:
+        port: "{{ app_port }}"
+        delay: 10
+        timeout: 60
+
+    - name: Health check
+      uri:
+        url: "http://localhost:{{ app_port }}/api/v1/health"
+        method: GET
+        status_code: 200
+      register: health_result
+
+    - name: Print health check result
+      debug:
+        msg: "ShieldNet is {{ health_result.json.status }} on {{ inventory_hostname }}"

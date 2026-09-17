@@ -1,0 +1,47 @@
+---
+- name: Create app directory
+  file:
+    path: /opt/shieldnet
+    state: directory
+    owner: ec2-user
+    group: ec2-user
+    mode: '0755'
+
+- name: Copy app configuration
+  template:
+    src: application.properties.j2
+    dest: /opt/shieldnet/application.properties
+    owner: ec2-user
+    group: ec2-user
+    mode: '0644'
+
+- name: Stop existing ShieldNet container
+  docker_container:
+    name: shieldnet-api
+    state: absent
+  ignore_errors: yes
+
+- name: Pull latest image
+  docker_image:
+    name: shieldnet/benefits-api:latest
+    source: pull
+    force_source: yes
+
+- name: Start ShieldNet container
+  docker_container:
+    name: shieldnet-api
+    image: shieldnet/benefits-api:latest
+    state: started
+    restart_policy: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/shieldnet/application.properties:/app/application.properties
+
+- name: Verify container is running
+  command: docker ps --filter name=shieldnet-api --format "table {{.Names}}\t{{.Status}}"
+  register: container_status
+
+- name: Print container status
+  debug:
+    msg: "{{ container_status.stdout }}"
